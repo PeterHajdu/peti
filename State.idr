@@ -16,6 +16,6 @@ showState (MkState (MkCursor x y) (MkDocument lines)) = do
   moveCursor x y
 
 export
-initialState : State
-initialState = MkState (MkCursor 0 0) (MkDocument ["helo", "bello"])
+initState : Document -> State
+initState doc = MkState (MkCursor 0 0) doc
 
