@@ -18,12 +18,18 @@ data RunCommand : Type where
 (>>=) : Command a -> (a -> Inf RunCommand) -> RunCommand
 (>>=) = Do
 
+shouldStop : Input -> Bool
+shouldStop (CharInput 'q') = True
+shouldStop _ = False
+
 export
 editor : State -> RunCommand
 editor state = do
   ShowState state
   input <- GetInput
-  Stop
+  if shouldStop input
+  then Stop
+  else editor $ handleInput input state
 
 private
 runCommand : Command a -> IO a
