@@ -27,9 +27,7 @@ editor state = do
 
 private
 runCommand : Command a -> IO a
-runCommand GetInput = do
-  getChar
-  pure MkInput
+runCommand GetInput = CharInput <$> getChar
 runCommand (ShowState state) = showState state
 
 export
