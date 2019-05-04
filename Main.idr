@@ -8,12 +8,15 @@ import Terminal
 
 %default total
 
+error : String -> IO ()
+error = putStrLn
+
 partial
 main : IO ()
 main = do
   arguments <- getArgs
-  let (Just filename) = index' 1 arguments
-  Right fileContent <- readFile filename
+  let (Just filename) = index' 1 arguments | error "usage: p <filename>"
+  Right fileContent <- readFile filename | error ("unable to open file: " ++ filename)
   let initialState = initState $ MkDocument $ lines fileContent
   setRaw
   run forever (editor initialState)
