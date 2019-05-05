@@ -26,8 +26,6 @@ insert doc@(MkDocument lines) (MkCursor x y) c =
     Yes _ => let line = index y lines
                  beginningLines = take y lines
                  endLines = drop (S y) lines
-              in if x <= (length line)
-                 then MkDocument $ beginningLines ++ ((insertToLine line x c):: endLines)
-                 else doc
+              in MkDocument $ beginningLines ++ ((insertToLine line x c):: endLines)
     No _ => doc
 
