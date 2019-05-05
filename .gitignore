@@ -1,5 +1,6 @@
 *.ibc
 p
 p.core
+test.core
 test
 

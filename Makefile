@@ -6,6 +6,6 @@ test: *.idr
 	./test
 
 clean:
-	rm -f p test *.ibc
+	rm -f p test *.ibc *.core
 
 .phony: clean
