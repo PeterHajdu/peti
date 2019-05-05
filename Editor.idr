@@ -9,6 +9,7 @@ import Input
 data Command : Type -> Type where
   GetInput : Command Input
   ShowState : State -> Command ()
+  Save : State -> Command ()
 
 export
 data RunCommand : Type where
@@ -28,13 +29,16 @@ editor state = do
   ShowState state
   input <- GetInput
   if shouldStop input
-  then Stop
+  then do
+    Save state
+    Stop
   else editor $ handleInput input state
 
 private
 runCommand : Command a -> IO a
 runCommand GetInput = CharInput <$> getChar
 runCommand (ShowState state) = showState state
+runCommand (Save state) = saveDocument state
 
 export
 run : Fuel -> RunCommand -> IO ()

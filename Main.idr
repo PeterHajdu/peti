@@ -17,7 +17,7 @@ main = do
   arguments <- getArgs
   let (Just filename) = index' 1 arguments | error "usage: p <filename>"
   Right fileContent <- readFile filename | error ("unable to open file: " ++ filename)
-  let initialState = initState $ MkDocument $ lines fileContent
+  let initialState = initState $ MkDocument (lines fileContent) filename
   setRaw
   run forever (editor initialState)
 

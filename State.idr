@@ -25,7 +25,7 @@ printLine (i, line) = do
 
 export
 showState : State -> IO ()
-showState (MkState mode (MkDocument lines)) = do
+showState (MkState mode (MkDocument lines _)) = do
   clearScreen
   traverse_ printLine (List.zip [1..(length lines)] lines)
   let (MkCursor x y) = cursor mode
@@ -34,6 +34,12 @@ showState (MkState mode (MkDocument lines)) = do
 export
 initState : Document -> State
 initState doc = MkState (Normal (MkCursor Z Z)) doc
+
+export
+saveDocument : State -> IO ()
+saveDocument (MkState _ (MkDocument lines fn)) = do
+  writeFile fn (unlines lines)
+  pure ()
 
 export
 handleInput : Input -> State -> State
