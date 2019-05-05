@@ -21,3 +21,7 @@ up (MkCursor x Z) = MkCursor x Z
 export
 down : Cursor -> Cursor
 down (MkCursor x y) = MkCursor x (S y)
+
+export
+lineStart : Cursor -> Cursor
+lineStart (MkCursor _ y) = MkCursor Z y

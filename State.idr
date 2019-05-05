@@ -46,8 +46,11 @@ handleInput (CharInput c) state@(MkState (Normal cur) doc) =
     'i' => MkState (Input $ cur) doc
     _ => state
 handleInput (CharInput c) state@(MkState (Input cur) doc) =
-  case c of
-    '\ESC' => MkState (Normal cur) doc
+  case (ord c) of
+    27 => MkState (Normal cur) doc
+    13 => let nextDoc = newLine doc cur
+              nextCur = lineStart $ down cur
+           in MkState (Input nextCur) nextDoc
     _ => let nextDoc = insert doc cur c
              nextCur = right cur
           in MkState (Input nextCur) nextDoc

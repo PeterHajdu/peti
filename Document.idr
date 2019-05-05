@@ -31,3 +31,17 @@ insert doc@(MkDocument lines) (MkCursor x y) c =
                  else doc
     No _ => doc
 
+splitLineAt : String -> Nat -> List String
+splitLineAt line x = [substr 0 x line, substr x 100 line]
+
+export
+newLine : Document -> Cursor -> Document
+newLine doc@(MkDocument lines) (MkCursor x y) =
+  case (inBounds y lines) of
+    Yes _ => let line = index y lines
+                 beginningLines = take y lines
+                 endLines = drop (S y) lines
+              in if x <= (length line)
+                 then MkDocument $ beginningLines ++ (splitLineAt line x) ++ endLines
+                 else doc
+    No _ => doc
