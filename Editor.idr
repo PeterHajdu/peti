@@ -11,6 +11,8 @@ data EditorState = Insert | Normal
 
 data Command : (ty : Type) -> EditorState -> (ty -> EditorState) -> Type where
   GetInput : Command Input Insert (const Insert)
+  GetNormatInput : Command NormalInput Normal (const Normal)
+  GetInsertInput : Command InsertInput Insert (const Insert)
   ShowState : State -> Command () Insert (const Insert)
   Save : State -> Command () Insert (const Insert)
   (>>=) : Command a state1 state2_fn ->
@@ -48,6 +50,8 @@ editor state = do
 private
 runCommand : Command a s1 s2-> IO a
 runCommand GetInput = CharInput <$> getChar
+runCommand GetNormatInput = MkNormal <$> getChar
+runCommand GetInsertInput = MkInsert <$> getChar
 runCommand (ShowState state) = showState state
 runCommand (Save state) = saveDocument state
 runCommand (cmdl >>= next) = do
