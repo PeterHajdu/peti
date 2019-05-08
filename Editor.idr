@@ -9,19 +9,25 @@ import Input
 public export
 data EditorState = Insert | Normal
 
-data Command : Type -> EditorState -> EditorState -> Type where
-  GetInput : Command Input Insert Insert
-  ShowState : State -> Command () Insert Insert
-  Save : State -> Command () Insert Insert
-  (>>=) : Command a state1 state2 -> (a -> Command b state2 state3) -> Command b state1 state3
+data Command : (ty : Type) -> EditorState -> (ty -> EditorState) -> Type where
+  GetInput : Command Input Insert (const Insert)
+  ShowState : State -> Command () Insert (const Insert)
+  Save : State -> Command () Insert (const Insert)
+  (>>=) : Command a state1 state2_fn ->
+          ((res: a) -> Command b (state2_fn res) state3_fn) ->
+          Command b state1 state3_fn
 
 export
 data RunCommand : EditorState -> Type where
-  Do : Command a state1 state2 -> (a -> Inf (RunCommand state2)) -> RunCommand state1
+  Do : Command a state1 state2_fn ->
+       ((res: a) -> Inf (RunCommand (state2_fn res))) ->
+       RunCommand state1
   Stop : RunCommand Insert
 
 namespace RunCommandDo
-  (>>=) : Command a state1 state2 -> (a -> Inf (RunCommand state2)) -> RunCommand state1
+  (>>=) : Command a state1 state2_fn ->
+          ((res: a) -> Inf (RunCommand (state2_fn res))) ->
+          RunCommand state1
   (>>=) = Do
 
 shouldStop : Input -> Bool
