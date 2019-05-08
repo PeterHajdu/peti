@@ -7,9 +7,9 @@ import Input
 %default total
 
 public export
-data EditorState = Insert | Normal
+data EditorMode = Insert | Normal
 
-data Command : (ty : Type) -> EditorState -> (ty -> EditorState) -> Type where
+data Command : (ty : Type) -> EditorMode -> (ty -> EditorMode) -> Type where
   GetNormatInput : Command NormalInput Normal (const Normal)
   GetInsertInput : Command InsertInput Insert (const Insert)
   ShowState : State -> Command () Insert (const Insert)
@@ -19,7 +19,7 @@ data Command : (ty : Type) -> EditorState -> (ty -> EditorState) -> Type where
           Command b state1 state3_fn
 
 export
-data RunCommand : EditorState -> Type where
+data RunCommand : EditorMode -> Type where
   Do : Command a state1 state2_fn ->
        ((res: a) -> Inf (RunCommand (state2_fn res))) ->
        RunCommand state1
