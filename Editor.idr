@@ -2,6 +2,7 @@ module Editor
 
 import Data.Fuel
 import State
+import InsertMode
 import Input
 
 %default total
@@ -44,7 +45,7 @@ editor state = do
   then do
     Save state
     Stop
-  else editor $ handleInput input state
+  else editor $ handleInsertInput input state
 
 private
 runCommand : Command a s1 s2-> IO a
