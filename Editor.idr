@@ -13,14 +13,16 @@ data Command : Type -> EditorState -> EditorState -> Type where
   GetInput : Command Input Insert Insert
   ShowState : State -> Command () Insert Insert
   Save : State -> Command () Insert Insert
+  (>>=) : Command a state1 state2 -> (a -> Command b state2 state3) -> Command b state1 state3
 
 export
 data RunCommand : EditorState -> Type where
   Do : Command a state1 state2 -> (a -> Inf (RunCommand state2)) -> RunCommand state1
   Stop : RunCommand Insert
 
-(>>=) : Command a state1 state2 -> (a -> Inf (RunCommand state2)) -> RunCommand state1
-(>>=) = Do
+namespace RunCommandDo
+  (>>=) : Command a state1 state2 -> (a -> Inf (RunCommand state2)) -> RunCommand state1
+  (>>=) = Do
 
 shouldStop : Input -> Bool
 shouldStop (CharInput 'q') = True
@@ -42,6 +44,9 @@ runCommand : Command a s1 s2-> IO a
 runCommand GetInput = CharInput <$> getChar
 runCommand (ShowState state) = showState state
 runCommand (Save state) = saveDocument state
+runCommand (cmdl >>= next) = do
+  result <- runCommand cmdl
+  runCommand (next result)
 
 export
 run : Fuel -> RunCommand s -> IO ()
