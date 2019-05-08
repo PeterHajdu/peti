@@ -10,7 +10,6 @@ public export
 data EditorState = Insert | Normal
 
 data Command : (ty : Type) -> EditorState -> (ty -> EditorState) -> Type where
-  GetInput : Command Input Insert (const Insert)
   GetNormatInput : Command NormalInput Normal (const Normal)
   GetInsertInput : Command InsertInput Insert (const Insert)
   ShowState : State -> Command () Insert (const Insert)
@@ -32,15 +31,15 @@ namespace RunCommandDo
           RunCommand state1
   (>>=) = Do
 
-shouldStop : Input -> Bool
-shouldStop (CharInput 'q') = True
+shouldStop : InsertInput -> Bool
+shouldStop (MkInsert 'q') = True
 shouldStop _ = False
 
 export
 editor : State -> RunCommand Insert
 editor state = do
   ShowState state
-  input <- GetInput
+  input <- GetInsertInput
   if shouldStop input
   then do
     Save state
@@ -49,7 +48,6 @@ editor state = do
 
 private
 runCommand : Command a s1 s2-> IO a
-runCommand GetInput = CharInput <$> getChar
 runCommand GetNormatInput = MkNormal <$> getChar
 runCommand GetInsertInput = MkInsert <$> getChar
 runCommand (ShowState state) = showState state

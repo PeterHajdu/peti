@@ -42,8 +42,8 @@ saveDocument (MkState _ (MkDocument lines fn)) = do
   pure ()
 
 export
-handleInput : Input -> State -> State
-handleInput (CharInput c) state@(MkState (Normal cur) doc) =
+handleInput : InsertInput -> State -> State
+handleInput (MkInsert c) state@(MkState (Normal cur) doc) =
   case c of
     'l' => MkState (Normal $ right cur) doc
     'h' => MkState (Normal $ left cur) doc
@@ -51,7 +51,7 @@ handleInput (CharInput c) state@(MkState (Normal cur) doc) =
     'j' => MkState (Normal $ down cur) doc
     'i' => MkState (Input $ cur) doc
     _ => state
-handleInput (CharInput c) state@(MkState (Input cur) doc) =
+handleInput (MkInsert c) state@(MkState (Input cur) doc) =
   case (ord c) of
     27 => MkState (Normal cur) doc
     13 => let nextDoc = newLine doc cur
