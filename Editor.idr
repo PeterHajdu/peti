@@ -3,7 +3,7 @@ module Editor
 import Data.Fuel
 import State
 import InsertMode
-import Input
+import NormalMode
 
 %default total
 

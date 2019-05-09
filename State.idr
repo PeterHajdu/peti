@@ -1,6 +1,5 @@
 module State
 
-import Input
 import Terminal
 import Cursor
 import Document

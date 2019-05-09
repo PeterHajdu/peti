@@ -1,7 +1,6 @@
 module InsertMode
 
 import State
-import Input
 import Cursor
 import Document
 

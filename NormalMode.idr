@@ -1,7 +1,6 @@
 module NormalMode
 
 import State
-import Input
 import Cursor
 import Document
 
