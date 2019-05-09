@@ -55,7 +55,9 @@ mutual
       Just NormalLeft => normalEditor newState
       Just NormalRight => normalEditor newState
       Just NormalDown => normalEditor newState
-      Just NormalSave => normalEditor newState
+      Just NormalSave => do
+        Save state
+        normalEditor newState
       Just NormalQuit => Stop
 
   export
