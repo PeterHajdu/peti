@@ -65,10 +65,11 @@ mutual
   insertEditor state = do
     ShowState state
     input <- GetInsertInput
+    let newState = updateInsertState input state
     case input of
-      (InsertChar _) => insertEditor $ updateInsertState input state
-      InsertNewLine => insertEditor $ updateInsertState input state
-      InsertNormal => normalEditor state
+      (InsertChar _) => insertEditor newState
+      InsertNewLine => insertEditor newState
+      InsertNormal => normalEditor newState
 
 private
 runCommand : Command a s1 s2-> IO a
