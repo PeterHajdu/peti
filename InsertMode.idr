@@ -20,13 +20,13 @@ updateInsertState InsertNewLine state@(MkState cur doc) = let nextDoc = newLine 
                                                            in MkState nextCur nextDoc
 updateInsertState InsertNormal state = state
 
-export
-getInsertInput : IO InsertInput
-getInsertInput = InsertChar <$> getChar
-
 parseChar : Char -> InsertInput
 parseChar c =
   case (ord c) of
     27 => InsertNormal
     13 => InsertNewLine
     _ => InsertChar c
+
+export
+getInsertInput : IO InsertInput
+getInsertInput = parseChar <$> getChar
