@@ -3,10 +3,11 @@ module State
 import Terminal
 import Cursor
 import Document
+import Data.Vect
 
 public export
 data State : Type where
-  MkState : Cursor -> Document -> State
+  MkState : Cursor -> Document n -> State
 
 printLine : (Nat, String) -> IO ()
 printLine (i, line) = do
@@ -17,17 +18,17 @@ export
 showState : State -> IO ()
 showState (MkState cursor (MkDocument lines _)) = do
   clearScreen
-  traverse_ printLine (List.zip [1..(length lines)] lines)
+  --traverse_ printLine (Data.Vect.zip [1..(length lines)] lines)
   let (MkCursor x y) = cursor
   moveCursor (S x) (S y)
 
 export
-initState : Document -> State
+initState : Document n -> State
 initState doc = MkState (MkCursor Z Z) doc
 
 export
 saveDocument : State -> IO ()
 saveDocument (MkState _ (MkDocument lines fn)) = do
-  writeFile fn (unlines lines)
+  writeFile fn (foldl (++) "" lines)
   pure ()
 
