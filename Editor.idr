@@ -11,7 +11,7 @@ public export
 data EditorMode = Insert | Normal
 
 data Command : (ty : Type) -> EditorMode -> (ty -> EditorMode) -> Type where
-  GetNormatInput : Command NormalInput Normal (const Normal)
+  GetNormalInput : Command NormalInput Normal (const Normal)
   GetInsertInput : Command InsertInput Insert (const Insert)
   ShowState : State -> Command () Insert (const Insert)
   Save : State -> Command () Insert (const Insert)
@@ -49,7 +49,7 @@ editor state = do
 
 private
 runCommand : Command a s1 s2-> IO a
-runCommand GetNormatInput = MkNormal <$> getChar
+runCommand GetNormalInput = MkNormal <$> getChar
 runCommand GetInsertInput = MkInsert <$> getChar
 runCommand (ShowState state) = showState state
 runCommand (Save state) = saveDocument state
