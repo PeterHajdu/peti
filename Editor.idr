@@ -8,9 +8,18 @@ import EditorMode
 
 %default total
 
+normalModeChange : Maybe NormalInput -> EditorMode
+normalModeChange (Just NormalInsert) = Insert
+normalModeChange _ = Normal
+
+insertModeChange : InsertInput -> EditorMode
+insertModeChange InsertChar = Insert
+insertModeChange InsertNewLine = Insert
+insertModeChange InsertNormal = Normal
+
 data Command : (ty : Type) -> EditorMode -> (ty -> EditorMode) -> Type where
-  GetNormalInput : Command (Maybe NormalInput) Normal (const Normal)
-  GetInsertInput : Command InsertInput Insert (const Insert)
+  GetNormalInput : Command (Maybe NormalInput) Normal (\input => normalModeChange input)
+  GetInsertInput : Command InsertInput Insert (\input => insertModeChange input)
   ShowState : State -> Command () s (const s)
   Save : State -> Command () Normal (const Normal)
   Pure : a -> Command a s (const s)
@@ -31,28 +40,32 @@ namespace RunCommandDo
           RunCommand state1
   (>>=) = Do
 
-normalModeChange : input -> EditorMode
-normalModeChange _ = Normal
+mutual
+  export
+  normalEditor : State -> RunCommand Normal
+  normalEditor state = do
+    ShowState state
+    maybeInput <- GetNormalInput
+    let newState = maybe state (flip updateNormalState $ state) maybeInput
+    case maybeInput of
+      Nothing => normalEditor newState
+      Just NormalInsert => insertEditor newState
+      Just NormalUp => normalEditor newState
+      Just NormalLeft => normalEditor newState
+      Just NormalRight => normalEditor newState
+      Just NormalDown => normalEditor newState
+      Just NormalSave => normalEditor newState
+      Just NormalQuit => normalEditor newState
 
-handleNormalInput : State -> (input: NormalInput) -> Command () Normal (const $ normalModeChange input)
-handleNormalInput state NormalSave = Save state
-handleNormalInput state _ = Pure ()
-
-export
-normalEditor : State -> RunCommand Normal
-normalEditor state = do
-  ShowState state
-  maybeInput <- GetNormalInput
-  let newState = maybe state (flip updateNormalState $ state) maybeInput
-  let command = maybe (Pure ()) (handleNormalInput state) maybeInput
-  normalEditor newState
-
-export
-insertEditor : State -> RunCommand Insert
-insertEditor state = do
-  ShowState state
-  input <- GetInsertInput
-  insertEditor $ updateInsertState input state
+  export
+  insertEditor : State -> RunCommand Insert
+  insertEditor state = do
+    ShowState state
+    input <- GetInsertInput
+    case input of
+      InsertChar => insertEditor $ updateInsertState input state
+      InsertNewLine => insertEditor $ updateInsertState input state
+      InsertNormal => insertEditor state
 
 private
 runCommand : Command a s1 s2-> IO a
