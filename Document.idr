@@ -2,6 +2,7 @@ module Document
 
 import Data.Vect
 import Cursor
+import Terminal
 
 public export
 data Document : Nat -> Type where
@@ -47,3 +48,20 @@ newLine doc@(MkDocument lines fn) (MkCursor x y) = doc
 --                 then MkDocument (beginningLines ++ (splitLineAt line x) ++ endLines) fn
 --                 else doc
 --    No _ => doc
+
+printLineByLine : Vect n String -> Nat -> IO ()
+printLineByLine Nil _ = pure ()
+printLineByLine (line::rest) row = do
+  moveCursor Z row
+  putStr line
+  printLineByLine rest (S row)
+
+export
+showDocument : Document n -> IO ()
+showDocument (MkDocument lines _) = printLineByLine lines (S Z)
+
+export
+saveDocument : Document n -> IO ()
+saveDocument (MkDocument lines fn) = do
+  writeFile fn (foldl (++) "" lines)
+  pure ()

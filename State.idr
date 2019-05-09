@@ -9,16 +9,11 @@ public export
 data State : Type where
   MkState : Cursor -> Document n -> State
 
-printLine : (Nat, String) -> IO ()
-printLine (i, line) = do
-  moveCursor Z i
-  putStr line
-
 export
 showState : State -> IO ()
-showState (MkState cursor (MkDocument lines _)) = do
+showState (MkState cursor doc) = do
   clearScreen
-  --traverse_ printLine (Data.Vect.zip [1..(length lines)] lines)
+  showDocument doc
   let (MkCursor x y) = cursor
   moveCursor (S x) (S y)
 
@@ -28,7 +23,7 @@ initState doc = MkState (MkCursor Z Z) doc
 
 export
 saveDocument : State -> IO ()
-saveDocument (MkState _ (MkDocument lines fn)) = do
-  writeFile fn (foldl (++) "" lines)
+saveDocument (MkState _ doc) = do
+  saveDocument doc
   pure ()
 
