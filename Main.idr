@@ -5,6 +5,7 @@ import State
 import Editor
 import Document
 import Terminal
+import EditorMode
 
 %default total
 

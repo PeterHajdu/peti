@@ -4,17 +4,16 @@ import Data.Fuel
 import State
 import InsertMode
 import NormalMode
+import EditorMode
 
 %default total
 
-public export
-data EditorMode = Insert | Normal
-
 data Command : (ty : Type) -> EditorMode -> (ty -> EditorMode) -> Type where
-  GetNormalInput : Command NormalInput Normal (const Normal)
+  GetNormalInput : Command (Maybe NormalInput) Normal (const Normal)
   GetInsertInput : Command InsertInput Insert (const Insert)
-  ShowState : State -> Command () Insert (const Insert)
-  Save : State -> Command () Insert (const Insert)
+  ShowState : State -> Command () s (const s)
+  Save : State -> Command () Normal (const Normal)
+  Pure : a -> Command a s (const s)
   (>>=) : Command a state1 state2_fn ->
           ((res: a) -> Command b (state2_fn res) state3_fn) ->
           Command b state1 state3_fn
@@ -24,7 +23,7 @@ data RunCommand : EditorMode -> Type where
   Do : Command a state1 state2_fn ->
        ((res: a) -> Inf (RunCommand (state2_fn res))) ->
        RunCommand state1
-  Stop : RunCommand Insert
+  Stop : RunCommand Quit
 
 namespace RunCommandDo
   (>>=) : Command a state1 state2_fn ->
@@ -32,24 +31,26 @@ namespace RunCommandDo
           RunCommand state1
   (>>=) = Do
 
-shouldStop : InsertInput -> Bool
-shouldStop (MkInsert 'q') = True
-shouldStop _ = False
+normalModeChange : input -> EditorMode
+normalModeChange _ = Normal
+
+handleNormalInput : State -> (input: NormalInput) -> Command () Normal (const $ normalModeChange input)
+handleNormalInput state NormalSave = Save state
+handleNormalInput state _ = Pure ()
 
 export
-editor : State -> RunCommand Insert
+editor : State -> RunCommand Normal
 editor state = do
   ShowState state
-  input <- GetInsertInput
-  if shouldStop input
-  then do
-    Save state
-    Stop
-  else editor $ handleInsertInput input state
+  maybeInput <- GetNormalInput
+  let newState = maybe state (flip updateNormalState $ state) maybeInput
+  let command = maybe (Pure ()) (handleNormalInput state) maybeInput
+  editor newState
 
 private
 runCommand : Command a s1 s2-> IO a
-runCommand GetNormalInput = MkNormal <$> getChar
+runCommand (Pure a) = pure a
+runCommand GetNormalInput = getNormalInput
 runCommand GetInsertInput = MkInsert <$> getChar
 runCommand (ShowState state) = showState state
 runCommand (Save state) = saveDocument state
