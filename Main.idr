@@ -20,5 +20,4 @@ main = do
   Right fileContent <- readFile filename | error ("unable to open file: " ++ filename)
   let initialState = initState $ MkDocument (lines fileContent) filename
   setRaw
-  run forever (editor initialState)
-
+  run forever (normalEditor initialState)

@@ -39,19 +39,26 @@ handleNormalInput state NormalSave = Save state
 handleNormalInput state _ = Pure ()
 
 export
-editor : State -> RunCommand Normal
-editor state = do
+normalEditor : State -> RunCommand Normal
+normalEditor state = do
   ShowState state
   maybeInput <- GetNormalInput
   let newState = maybe state (flip updateNormalState $ state) maybeInput
   let command = maybe (Pure ()) (handleNormalInput state) maybeInput
-  editor newState
+  normalEditor newState
+
+export
+insertEditor : State -> RunCommand Insert
+insertEditor state = do
+  ShowState state
+  input <- GetInsertInput
+  insertEditor $ updateInsertState input state
 
 private
 runCommand : Command a s1 s2-> IO a
 runCommand (Pure a) = pure a
 runCommand GetNormalInput = getNormalInput
-runCommand GetInsertInput = MkInsert <$> getChar
+runCommand GetInsertInput = getInsertInput
 runCommand (ShowState state) = showState state
 runCommand (Save state) = saveDocument state
 runCommand (cmdl >>= next) = do
@@ -65,4 +72,3 @@ run (More fuel) (Do cmd continuation) = do
   result <- runCommand cmd
   run fuel (continuation result)
 run Dry _ = pure ()
-
