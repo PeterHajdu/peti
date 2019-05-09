@@ -10,10 +10,11 @@ import EditorMode
 
 normalModeChange : Maybe NormalInput -> EditorMode
 normalModeChange (Just NormalInsert) = Insert
+normalModeChange (Just NormalQuit) = Quit
 normalModeChange _ = Normal
 
 insertModeChange : InsertInput -> EditorMode
-insertModeChange InsertChar = Insert
+insertModeChange (InsertChar _) = Insert
 insertModeChange InsertNewLine = Insert
 insertModeChange InsertNormal = Normal
 
@@ -55,7 +56,7 @@ mutual
       Just NormalRight => normalEditor newState
       Just NormalDown => normalEditor newState
       Just NormalSave => normalEditor newState
-      Just NormalQuit => normalEditor newState
+      Just NormalQuit => Stop
 
   export
   insertEditor : State -> RunCommand Insert
@@ -63,9 +64,9 @@ mutual
     ShowState state
     input <- GetInsertInput
     case input of
-      InsertChar => insertEditor $ updateInsertState input state
+      (InsertChar _) => insertEditor $ updateInsertState input state
       InsertNewLine => insertEditor $ updateInsertState input state
-      InsertNormal => insertEditor state
+      InsertNormal => normalEditor state
 
 private
 runCommand : Command a s1 s2-> IO a
