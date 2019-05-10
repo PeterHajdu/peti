@@ -1,5 +1,6 @@
 module Document
 
+import Data.Fin
 import Data.Vect
 import Cursor
 import Terminal
@@ -38,16 +39,11 @@ splitLineAt : String -> Nat -> List String
 splitLineAt line x = [substr 0 x line, substr x 100 line]
 
 export
-newLine : Document n -> Cursor -> Document n
-newLine doc@(MkDocument lines fn) (MkCursor x y) = doc
---  case (inBounds y lines) of
---    Yes _ => let line = index y lines
---                 beginningLines = take y lines
---                 endLines = drop (S y) lines
---              in if x <= (length line)
---                 then MkDocument (beginningLines ++ (splitLineAt line x) ++ endLines) fn
---                 else doc
---    No _ => doc
+newLine : Document n -> Cursor -> Document (S n)
+newLine {n} doc@(MkDocument lines fn) (MkCursor x y) =
+  let row = maybe last weaken (natToFin y n)
+      newLines = insertAt row "" lines
+   in MkDocument newLines fn
 
 printLineByLine : Vect n String -> Nat -> IO ()
 printLineByLine Nil _ = pure ()
