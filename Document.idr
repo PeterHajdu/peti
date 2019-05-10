@@ -63,5 +63,5 @@ showDocument (MkDocument lines _) = printLineByLine lines (S Z)
 export
 saveDocument : Document n -> IO ()
 saveDocument (MkDocument lines fn) = do
-  writeFile fn (foldl (++) "" lines)
+  writeFile fn (foldl (\acc, line => acc ++ line ++ "\n") "" lines)
   pure ()
