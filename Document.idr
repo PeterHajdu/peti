@@ -18,22 +18,20 @@ Eq (Document n) where
   (MkDocument lines1 _) == (MkDocument lines2 _) = lines1 == lines2
 
 insertToLine : String -> Nat -> Char -> String
-insertToLine line x c = let linestart = substr 0 x line
-                            end = substr x (length line) line
-                         --in foldl (++) "" [linestart, singleton c, end]
-                         in "a"
+insertToLine line x c = let column = minimum x (length line) --todo: check openbsd segfault
+                            linestart = substr 0 column line
+                            end = substr column (length line) line
+                         in linestart ++ (singleton c) ++ end
 
 export
 insert : Document n -> Cursor -> Char -> Document n
-insert doc@(MkDocument lines fn) (MkCursor x y) c = doc
---  case (inBounds y lines) of
---    Yes _ => let line = index y lines
---                 beginningLines = take y lines
---                 endLines = drop (S y) lines
---              in if x <= (length line)
---                 then MkDocument (beginningLines ++ ((insertToLine line x c):: endLines)) fn
---                 else doc
---    No _ => doc
+insert doc@(MkDocument lines fn) (MkCursor x y) c =
+  case natToFin y n of
+    Just row => let line = Vect.index row lines
+                    newLine = (insertToLine line x c)
+                    newLines = replaceAt row newLine lines
+                 in MkDocument newLines fn
+    Nothing => doc
 
 splitLineAt : String -> Nat -> (String, String)
 splitLineAt line x = (substr 0 x line, substr x 100 line)
