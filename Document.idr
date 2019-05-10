@@ -35,15 +35,19 @@ insert doc@(MkDocument lines fn) (MkCursor x y) c = doc
 --                 else doc
 --    No _ => doc
 
-splitLineAt : String -> Nat -> List String
-splitLineAt line x = [substr 0 x line, substr x 100 line]
+splitLineAt : String -> Nat -> (String, String)
+splitLineAt line x = (substr 0 x line, substr x 100 line)
 
 export
 newLine : Document n -> Cursor -> Document (S n)
 newLine {n} doc@(MkDocument lines fn) (MkCursor x y) =
-  let row = maybe last weaken (natToFin y n)
-      newLines = insertAt row "" lines
-   in MkDocument newLines fn
+  case natToFin y n of
+    Just row => let line = Vect.index row lines
+                    (firstLine, secondLine) = splitLineAt line x
+                    withTruncatedLine = replaceAt row firstLine lines
+                    newLines = insertAt (shift 1 row) secondLine withTruncatedLine
+                 in MkDocument newLines fn
+    Nothing => MkDocument (insertAt last "" lines) fn
 
 printLineByLine : Vect n String -> Nat -> IO ()
 printLineByLine Nil _ = pure ()
