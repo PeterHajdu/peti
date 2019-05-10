@@ -20,7 +20,7 @@ updateNormalState : NormalInput -> State -> State
 updateNormalState NormalUp state@(MkState cur doc) = MkState (up cur) doc
 updateNormalState NormalLeft state@(MkState cur doc) = MkState (left cur) doc
 updateNormalState NormalRight state@(MkState cur doc) = MkState (right cur) doc
-updateNormalState NormalDown state@(MkState cur doc) = MkState (down cur) doc
+updateNormalState NormalDown state@(MkState cur doc) = MkState (downWithBound cur) doc
 updateNormalState _ state = state
 
 parseChar : Char -> Maybe NormalInput

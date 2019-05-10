@@ -24,28 +24,24 @@ insertToLine line x c = let column = minimum x (length line) --todo: check openb
                          in linestart ++ (singleton c) ++ end
 
 export
-insert : Document n -> Cursor -> Char -> Document n
+insert : Document n -> Cursor n -> Char -> Document n
 insert doc@(MkDocument lines fn) (MkCursor x y) c =
-  case natToFin y n of
-    Just row => let line = Vect.index row lines
-                    newLine = (insertToLine line x c)
-                    newLines = replaceAt row newLine lines
-                 in MkDocument newLines fn
-    Nothing => doc
+  let line = Vect.index y lines
+      newLine = (insertToLine line x c)
+      newLines = replaceAt y newLine lines
+   in MkDocument newLines fn
 
 splitLineAt : String -> Nat -> (String, String)
 splitLineAt line x = (substr 0 x line, substr x 100 line)
 
 export
-newLine : Document n -> Cursor -> Document (S n)
+newLine : Document n -> Cursor n -> Document (S n)
 newLine {n} doc@(MkDocument lines fn) (MkCursor x y) =
-  case natToFin y n of
-    Just row => let line = Vect.index row lines
-                    (firstLine, secondLine) = splitLineAt line x
-                    withTruncatedLine = replaceAt row firstLine lines
-                    newLines = insertAt (shift 1 row) secondLine withTruncatedLine
-                 in MkDocument newLines fn
-    Nothing => MkDocument (insertAt last "" lines) fn
+    let line = Vect.index y lines
+        (firstLine, secondLine) = splitLineAt line x
+        withTruncatedLine = replaceAt y firstLine lines
+        newLines = insertAt (shift 1 y) secondLine withTruncatedLine
+     in MkDocument newLines fn
 
 printLineByLine : Vect n String -> Nat -> IO ()
 printLineByLine Nil _ = pure ()
