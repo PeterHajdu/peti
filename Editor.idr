@@ -17,6 +17,7 @@ insertModeChange : InsertInput -> EditorMode
 insertModeChange (InsertChar _) = Insert
 insertModeChange InsertNewLine = Insert
 insertModeChange InsertNormal = Normal
+insertModeChange InsertBackspace = Insert
 
 data Command : (ty : Type) -> EditorMode -> (ty -> EditorMode) -> Type where
   GetNormalInput : Command (Maybe NormalInput) Normal (\input => normalModeChange input)
@@ -67,9 +68,10 @@ mutual
     input <- GetInsertInput
     let newState = updateInsertState input state
     case input of
-      (InsertChar _) => insertEditor newState
+      (InsertChar c) => insertEditor newState
       InsertNewLine => insertEditor newState
       InsertNormal => normalEditor newState
+      InsertBackspace => insertEditor newState
 
 private
 runCommand : Command a s1 s2-> IO a

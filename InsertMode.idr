@@ -9,6 +9,7 @@ data InsertInput : Type where
   InsertChar : Char -> InsertInput
   InsertNormal : InsertInput
   InsertNewLine : InsertInput
+  InsertBackspace : InsertInput
 
 export
 updateInsertState : InsertInput -> State -> State
@@ -18,13 +19,17 @@ updateInsertState (InsertChar c) state@(MkState cur doc) = let nextDoc = insert 
 updateInsertState InsertNewLine state@(MkState cur doc) = let nextDoc = newLine doc cur
                                                               nextCur = lineStart $ down cur
                                                            in MkState nextCur nextDoc
+updateInsertState InsertBackspace state@(MkState cur doc) = let nextDoc = deleteBack doc cur
+                                                             in MkState (left cur) nextDoc
 updateInsertState InsertNormal state = state
+
 
 parseChar : Char -> InsertInput
 parseChar c =
   case (ord c) of
-    27 => InsertNormal
+    127 => InsertBackspace
     13 => InsertNewLine
+    27 => InsertNormal
     _ => InsertChar c
 
 export

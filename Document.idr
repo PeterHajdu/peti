@@ -34,6 +34,18 @@ insert doc@(MkDocument lines fn) (MkCursor x y) c =
 splitLineAt : String -> Nat -> (String, String)
 splitLineAt line x = (substr 0 x line, substr x 100 line)
 
+safeStrTail : String -> String
+safeStrTail str = if 0 == (length str) then "" else substr 1 (length str) str
+
+export
+deleteBack : Document n -> Cursor n -> Document n
+deleteBack doc@(MkDocument lines fn) (MkCursor x y) =
+  let line = Vect.index y lines
+      (firstPart, secondPart) = splitLineAt line (minus x 1)
+      newLine = firstPart ++ (safeStrTail secondPart)
+      newLines = replaceAt y newLine lines
+   in MkDocument newLines fn
+
 export
 newLine : Document n -> Cursor n -> Document (S n)
 newLine {n} doc@(MkDocument lines fn) (MkCursor x y) =
