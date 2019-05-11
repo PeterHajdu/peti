@@ -13,6 +13,7 @@ data NormalInput : Type where
   NormalInsert : NormalInput
   NormalSave : NormalInput
   NormalQuit : NormalInput
+  NormalDeleteAt : NormalInput
 
 
 export
@@ -21,6 +22,7 @@ updateNormalState NormalUp state@(MkState cur doc) = MkState (up cur) doc
 updateNormalState NormalLeft state@(MkState cur doc) = MkState (left cur) doc
 updateNormalState NormalRight state@(MkState cur doc) = MkState (right cur) doc
 updateNormalState NormalDown state@(MkState cur doc) = MkState (downWithBound cur) doc
+updateNormalState NormalDeleteAt state@(MkState cur doc) = MkState cur (deleteAt doc cur)
 updateNormalState _ state = state
 
 parseChar : Char -> Maybe NormalInput
@@ -33,6 +35,7 @@ parseChar c =
     'i' => Just NormalInsert
     'w' => Just NormalSave
     'q' => Just NormalQuit
+    'x' => Just NormalDeleteAt
     _ => Nothing
 
 export

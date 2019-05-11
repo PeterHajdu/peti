@@ -37,11 +37,21 @@ splitLineAt line x = (substr 0 x line, substr x 100 line)
 safeStrTail : String -> String
 safeStrTail str = if 0 == (length str) then "" else substr 1 (length str) str
 
+--todo: extract some duplication if possible
 export
 deleteBack : Document n -> Cursor n -> Document n
 deleteBack doc@(MkDocument lines fn) (MkCursor x y) =
   let line = Vect.index y lines
       (firstPart, secondPart) = splitLineAt line (minus x 1)
+      newLine = firstPart ++ (safeStrTail secondPart)
+      newLines = replaceAt y newLine lines
+   in MkDocument newLines fn
+
+export
+deleteAt : Document n -> Cursor n -> Document n
+deleteAt doc@(MkDocument lines fn) (MkCursor x y) =
+  let line = Vect.index y lines
+      (firstPart, secondPart) = splitLineAt line x
       newLine = firstPart ++ (safeStrTail secondPart)
       newLines = replaceAt y newLine lines
    in MkDocument newLines fn
