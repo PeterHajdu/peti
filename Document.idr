@@ -4,6 +4,7 @@ import Data.Fin
 import Data.Vect
 import Cursor
 import Terminal
+import Data.Fuel
 
 public export
 data Document : Nat -> Type where
@@ -65,16 +66,18 @@ newLine {n} doc@(MkDocument lines fn) (MkCursor x y) =
         newLines = insertAt (shift 1 y) secondLine withTruncatedLine
      in MkDocument newLines fn
 
-printLineByLine : Vect n String -> Nat -> IO ()
-printLineByLine Nil _ = pure ()
-printLineByLine (line::rest) row = do
-  moveCursor Z row
-  putStr line
-  printLineByLine rest (S row)
+printLineByLine : Fuel -> Nat -> Fin n -> Vect n String -> IO ()
+printLineByLine Dry _ _ _ = pure ()
+printLineByLine (More fuel) y row lines = do
+  moveCursor Z y
+  putStr $ index row lines
+  case (strengthen $ shift 1 row) of
+    Left _ => pure ()
+    Right newRow => printLineByLine fuel (S y) newRow lines
 
 export
-showDocument : Document n -> IO ()
-showDocument (MkDocument lines _) = printLineByLine lines (S Z)
+showDocument : Document n -> Cursor n -> IO ()
+showDocument (MkDocument lines _) (MkCursor _ y) = printLineByLine (limit 20) (S Z) y lines
 
 export
 saveDocument : Document n -> IO ()

@@ -11,11 +11,10 @@ data State : Type where
 
 export
 showState : State -> IO ()
-showState (MkState cursor doc) = do
+showState (MkState cursor@(MkCursor x y) doc) = do
   clearScreen
-  showDocument doc
-  let (MkCursor x y) = cursor
-  moveCursor (S x) (S (finToNat y))
+  showDocument doc cursor
+  moveCursor (S x) 1
 
 export
 initState : Document (S n) -> State
