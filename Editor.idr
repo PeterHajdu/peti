@@ -57,6 +57,8 @@ mutual
       Just NormalRight => normalEditor newState
       Just NormalDown => normalEditor newState
       Just NormalDeleteAt => normalEditor newState
+      Just NormalTop => normalEditor newState
+      Just NormalBottom => normalEditor newState
       Just NormalSave => do
         Save state
         normalEditor newState

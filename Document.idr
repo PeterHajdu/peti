@@ -8,7 +8,7 @@ import Data.Fuel
 
 public export
 data Document : Nat -> Type where
-  MkDocument : Vect n String -> (filename: String) -> Document n
+  MkDocument : Vect (S n) String -> (filename: String) -> Document (S n)
 
 export
 Show (Document n) where
@@ -58,7 +58,7 @@ deleteAt doc@(MkDocument lines fn) (MkCursor x y) =
    in MkDocument newLines fn
 
 export
-newLine : Document n -> Cursor n -> Document (S n)
+newLine : Document (S n) -> Cursor (S n) -> Document (S (S n))
 newLine {n} doc@(MkDocument lines fn) (MkCursor x y) =
     let line = Vect.index y lines
         (firstLine, secondLine) = splitLineAt line x

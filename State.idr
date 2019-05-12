@@ -7,7 +7,7 @@ import Data.Vect
 
 public export
 data State : Type where
-  MkState : Cursor n -> Document n -> State
+  MkState : Cursor (S n) -> Document (S n) -> State
 
 export
 showState : State -> IO ()
