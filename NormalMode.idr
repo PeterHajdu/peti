@@ -1,5 +1,6 @@
 module NormalMode
 
+import Data.Fuel
 import State
 import Cursor
 import Document
@@ -34,21 +35,31 @@ updateNormalState NormalTop (MkState (MkCursor x y) doc) = MkState (MkCursor x (
 updateNormalState NormalBottom (MkState (MkCursor x _) doc) = MkState (MkCursor x last) doc
 updateNormalState _ state = state
 
-parseChar : Char -> Maybe NormalInput
-parseChar c =
-  case c of
-    'h' => Just NormalLeft
-    'j' => Just NormalDown
-    'k' => Just NormalUp
-    'l' => Just NormalRight
-    'i' => Just NormalInsert
-    'w' => Just NormalSave
-    'q' => Just NormalQuit
-    'x' => Just NormalDeleteAt
-    'g' => Just NormalTop
-    'G' => Just NormalBottom
-    _ => Nothing
+data InputParser : Type where
+   Continuation : (Char -> InputParser) -> InputParser
+   Finished : Maybe NormalInput -> InputParser
+
+parser : InputParser
+parser = Continuation $ \c1 => case c1 of
+    'h' => Finished $ Just NormalLeft
+    'j' => Finished $ Just NormalDown
+    'k' => Finished $ Just NormalUp
+    'l' => Finished $ Just NormalRight
+    'i' => Finished $ Just NormalInsert
+    'w' => Finished $ Just NormalSave
+    'q' => Finished $ Just NormalQuit
+    'x' => Finished $ Just NormalDeleteAt
+    'G' => Finished $ Just NormalBottom
+    'g' => Continuation $ \c2 => Finished $ if c2 == 'g' then Just NormalTop else Nothing
+    _ => Finished Nothing
+
+parseInput : Fuel -> InputParser -> IO (Maybe NormalInput)
+parseInput Dry _ = pure Nothing
+parseInput _ (Finished result) = pure result
+parseInput (More rest) (Continuation parser) = do
+  c <- getChar
+  parseInput rest (parser c)
 
 export
 getNormalInput : IO (Maybe NormalInput)
-getNormalInput = parseChar <$> getChar
+getNormalInput = parseInput (limit 3) parser
