@@ -60,6 +60,7 @@ mutual
       Just NormalTop => normalEditor newState
       Just NormalBottom => normalEditor newState
       Just NormalBeginningOfLine => normalEditor newState
+      Just NormalEndOfLine => normalEditor newState
       Just NormalSave => do
         Save state
         normalEditor newState

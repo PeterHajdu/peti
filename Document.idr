@@ -84,3 +84,7 @@ saveDocument : Document n -> IO ()
 saveDocument (MkDocument lines fn) = do
   writeFile fn (foldl (\acc, line => acc ++ line ++ "\n") "" lines)
   pure ()
+
+export
+endOfLine : Cursor n -> Document n -> Cursor n
+endOfLine (MkCursor _ y) (MkDocument lines _) = MkCursor (length $ index y lines) y
