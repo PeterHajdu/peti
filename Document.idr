@@ -88,3 +88,12 @@ saveDocument (MkDocument lines fn) = do
 export
 endOfLine : Cursor n -> Document n -> Cursor n
 endOfLine (MkCursor _ y) (MkDocument lines _) = MkCursor (length $ index y lines) y
+
+export
+endOfWord : Cursor (S n) -> Document (S n) -> Cursor (S n)
+endOfWord old@(MkCursor oldX y) (MkDocument lines _) =
+  let line = index y lines
+      wordEnds = (elemIndices ' ' $ unpack $ line)
+      maybeNextEnd = find (\x => x > (S oldX)) wordEnds
+      nextEnd = maybe (length line) id maybeNextEnd
+   in MkCursor (pred nextEnd) y
