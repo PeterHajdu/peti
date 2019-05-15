@@ -5,6 +5,7 @@ import State
 import Cursor
 import Document
 import Data.Fin
+import Parser
 
 public export
 data NormalInput : Type where
@@ -41,11 +42,7 @@ updateNormalState NormalEndOfLine (MkState cur doc) = MkState (endOfLine cur doc
 updateNormalState NormalEndOfWord (MkState cur doc) = MkState (endOfWord cur doc) doc
 updateNormalState _ state = state
 
-data InputParser : Type where
-   Continuation : (Char -> InputParser) -> InputParser
-   Finished : Maybe NormalInput -> InputParser
-
-parser : InputParser
+parser : Parser Char NormalInput
 parser = Continuation $ \c1 => case c1 of
     'h' => Finished $ Just NormalLeft
     'j' => Finished $ Just NormalDown
@@ -61,13 +58,6 @@ parser = Continuation $ \c1 => case c1 of
     'e' => Finished $ Just NormalEndOfWord
     _ => Finished Nothing
 
-parseInput : Fuel -> InputParser -> IO (Maybe NormalInput)
-parseInput Dry _ = pure Nothing
-parseInput _ (Finished result) = pure result
-parseInput (More rest) (Continuation parser) = do
-  c <- getChar
-  parseInput rest (parser c)
-
 export
 getNormalInput : IO (Maybe NormalInput)
-getNormalInput = parseInput (limit 3) parser
+getNormalInput = runParser (limit 3) getChar parser
