@@ -55,6 +55,7 @@ parser = Continuation $ \c1 => case c1 of
     'G' => Finished $ Just NormalBottom
     'g' => Continuation $ \c2 => Finished $ if c2 == 'g' then Just NormalTop else Nothing
     '|' => Finished $ Just NormalBeginningOfLine
+    '$' => Finished $ Just NormalEndOfLine
     'e' => Finished $ Just NormalEndOfWord
     _ => Finished Nothing
 

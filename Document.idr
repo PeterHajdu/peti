@@ -87,7 +87,7 @@ saveDocument (MkDocument lines fn) = do
 
 export
 endOfLine : Cursor n -> Document n -> Cursor n
-endOfLine (MkCursor _ y) (MkDocument lines _) = MkCursor (length $ index y lines) y
+endOfLine (MkCursor _ y) (MkDocument lines _) = MkCursor (pred $ length $ index y lines) y
 
 export
 endOfWord : Cursor (S n) -> Document (S n) -> Cursor (S n)
