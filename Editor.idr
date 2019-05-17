@@ -2,7 +2,7 @@ module Editor
 
 import Data.Fuel
 import State
-import InsertMode
+import InsertInput
 import NormalInput
 import EditorMode
 import Document
@@ -83,12 +83,12 @@ mutual
   insertEditor state = do
     ShowState state
     input <- GetInsertInput
-    let newState = updateInsertState input state
+    let (MkState cur doc) = state
     case input of
-      (InsertChar c) => insertEditor newState
-      InsertNewLine => insertEditor newState
-      InsertNormal => normalEditor newState
-      InsertBackspace => insertEditor newState
+      (InsertChar c) => insertEditor $ MkState (right cur) (insert doc cur c)
+      InsertNewLine => insertEditor $ MkState (lineStart $ down cur) (newLine doc cur)
+      InsertNormal => normalEditor state
+      InsertBackspace => insertEditor $ MkState (left cur) (deleteBack doc cur)
 
 private
 runCommand : Command a s1 s2-> IO a
