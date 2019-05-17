@@ -97,3 +97,12 @@ endOfWord old@(MkCursor oldX y) (MkDocument lines _) =
       maybeNextEnd = find (\x => x > (S oldX)) wordEnds
       nextEnd = maybe (length line) id maybeNextEnd
    in MkCursor (pred nextEnd) y
+
+export
+beginningOfWord : Cursor (S n) -> Document (S n) -> Cursor (S n)
+beginningOfWord old@(MkCursor oldX y) (MkDocument lines _) =
+  let line = index y lines
+      wordEnds = reverse $ elemIndices ' ' $ unpack $ line
+      maybeNextStart = S <$> find (\x => x < (pred oldX)) wordEnds
+      nextStart = maybe Z id maybeNextStart
+   in MkCursor nextStart y

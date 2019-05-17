@@ -22,6 +22,7 @@ data NormalInput : Type where
   NormalBeginningOfLine : NormalInput
   NormalEndOfLine : NormalInput
   NormalEndOfWord : NormalInput
+  NormalBeginningOfWord : NormalInput
 
 toZ : Fin n -> Fin n
 toZ original {n} = case natToFin Z n of
@@ -40,6 +41,7 @@ updateNormalState NormalBottom (MkState (MkCursor x _) doc) = MkState (MkCursor 
 updateNormalState NormalBeginningOfLine (MkState (MkCursor _ y) doc) = MkState (MkCursor Z y) doc
 updateNormalState NormalEndOfLine (MkState cur doc) = MkState (endOfLine cur doc) doc
 updateNormalState NormalEndOfWord (MkState cur doc) = MkState (endOfWord cur doc) doc
+updateNormalState NormalBeginningOfWord (MkState cur doc) = MkState (beginningOfWord cur doc) doc
 updateNormalState _ state = state
 
 parser : Parser Char NormalInput
@@ -57,6 +59,7 @@ parser = Continuation $ \c1 => case c1 of
     '|' => Finished $ Just NormalBeginningOfLine
     '$' => Finished $ Just NormalEndOfLine
     'e' => Finished $ Just NormalEndOfWord
+    'b' => Finished $ Just NormalBeginningOfWord
     _ => Finished Nothing
 
 export

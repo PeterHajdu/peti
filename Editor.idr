@@ -62,6 +62,7 @@ mutual
       Just NormalBeginningOfLine => normalEditor newState
       Just NormalEndOfLine => normalEditor newState
       Just NormalEndOfWord => normalEditor newState
+      Just NormalBeginningOfWord => normalEditor newState
       Just NormalSave => do
         Save state
         normalEditor newState
