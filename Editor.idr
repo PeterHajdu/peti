@@ -3,10 +3,19 @@ module Editor
 import Data.Fuel
 import State
 import InsertMode
-import NormalMode
+import NormalInput
 import EditorMode
+import Document
+import Cursor
+import Data.Fin
 
 %default total
+
+toZ : Fin n -> Fin n
+toZ original {n} = case natToFin Z n of
+                     Just k => k
+                     Nothing => original
+
 
 normalModeChange : Maybe NormalInput -> EditorMode
 normalModeChange (Just NormalInsert) = Insert
@@ -48,24 +57,25 @@ mutual
   normalEditor state = do
     ShowState state
     maybeInput <- GetNormalInput
-    let newState = maybe state (flip updateNormalState $ state) maybeInput
+    let (MkState cur doc) = state
+    let (MkCursor x y) = cur
     case maybeInput of
-      Nothing => normalEditor newState
-      Just NormalInsert => insertEditor newState
-      Just NormalUp => normalEditor newState
-      Just NormalLeft => normalEditor newState
-      Just NormalRight => normalEditor newState
-      Just NormalDown => normalEditor newState
-      Just NormalDeleteAt => normalEditor newState
-      Just NormalTop => normalEditor newState
-      Just NormalBottom => normalEditor newState
-      Just NormalBeginningOfLine => normalEditor newState
-      Just NormalEndOfLine => normalEditor newState
-      Just NormalEndOfWord => normalEditor newState
-      Just NormalBeginningOfWord => normalEditor newState
+      Nothing => normalEditor state
+      Just NormalInsert => insertEditor state
+      Just NormalUp => normalEditor $ MkState (up cur) doc
+      Just NormalLeft => normalEditor $ MkState (left cur) doc
+      Just NormalRight => normalEditor $ MkState (right cur) doc
+      Just NormalDown => normalEditor $ MkState (downWithBound cur) doc
+      Just NormalDeleteAt => normalEditor $ MkState cur (deleteAt doc cur)
+      Just NormalTop => normalEditor $ MkState (MkCursor x (toZ y)) doc
+      Just NormalBottom => normalEditor $ MkState (MkCursor x last) doc
+      Just NormalBeginningOfLine => normalEditor $ MkState (MkCursor Z y) doc
+      Just NormalEndOfLine => normalEditor $ MkState (endOfLine cur doc) doc
+      Just NormalEndOfWord => normalEditor $ MkState (endOfWord cur doc) doc
+      Just NormalBeginningOfWord => normalEditor $ MkState (beginningOfWord cur doc) doc
       Just NormalSave => do
         Save state
-        normalEditor newState
+        normalEditor state
       Just NormalQuit => Stop
 
   export

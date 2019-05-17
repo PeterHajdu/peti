@@ -1,4 +1,4 @@
-module NormalMode
+module NormalInput
 
 import Data.Fuel
 import State
@@ -23,26 +23,6 @@ data NormalInput : Type where
   NormalEndOfLine : NormalInput
   NormalEndOfWord : NormalInput
   NormalBeginningOfWord : NormalInput
-
-toZ : Fin n -> Fin n
-toZ original {n} = case natToFin Z n of
-                     Just k => k
-                     Nothing => original
-
-export
-updateNormalState : NormalInput -> State -> State
-updateNormalState NormalUp state@(MkState cur doc) = MkState (up cur) doc
-updateNormalState NormalLeft state@(MkState cur doc) = MkState (left cur) doc
-updateNormalState NormalRight state@(MkState cur doc) = MkState (right cur) doc
-updateNormalState NormalDown state@(MkState cur doc) = MkState (downWithBound cur) doc
-updateNormalState NormalDeleteAt state@(MkState cur doc) = MkState cur (deleteAt doc cur)
-updateNormalState NormalTop (MkState (MkCursor x y) doc) = MkState (MkCursor x (toZ y)) doc
-updateNormalState NormalBottom (MkState (MkCursor x _) doc) = MkState (MkCursor x last) doc
-updateNormalState NormalBeginningOfLine (MkState (MkCursor _ y) doc) = MkState (MkCursor Z y) doc
-updateNormalState NormalEndOfLine (MkState cur doc) = MkState (endOfLine cur doc) doc
-updateNormalState NormalEndOfWord (MkState cur doc) = MkState (endOfWord cur doc) doc
-updateNormalState NormalBeginningOfWord (MkState cur doc) = MkState (beginningOfWord cur doc) doc
-updateNormalState _ state = state
 
 parser : Parser Char NormalInput
 parser = Continuation $ \c1 => case c1 of
