@@ -13,8 +13,8 @@ export
 showState : State -> IO ()
 showState (MkState cursor@(MkCursor x y) doc) = do
   clearScreen
-  showDocument doc cursor
-  moveCursor (S x) 1
+  showDocument 20 doc cursor
+  moveCursor (S x) 21
 
 export
 initState : Document (S n) -> State

@@ -66,18 +66,21 @@ newLine {n} doc@(MkDocument lines fn) (MkCursor x y) =
         newLines = insertAt (shift 1 y) secondLine withTruncatedLine
      in MkDocument newLines fn
 
-printLineByLine : Fuel -> Nat -> Fin n -> Vect n String -> IO ()
+printLineByLine : Fuel -> Nat -> Integer -> Vect n String -> IO ()
 printLineByLine Dry _ _ _ = pure ()
-printLineByLine (More fuel) y row lines = do
+printLineByLine (More fuel) y theoreticalRow lines {n} = do
   moveCursor Z y
-  putStr $ index row lines
-  case (strengthen $ shift 1 row) of
-    Left _ => pure ()
-    Right newRow => printLineByLine fuel (S y) newRow lines
+  let maybeRow = integerToFin theoreticalRow n
+  case maybeRow of
+    Nothing => do
+      putStr "~"
+    Just row => do
+      putStr $ index row lines
+  printLineByLine fuel (S y) (theoreticalRow + 1) lines
 
 export
-showDocument : Document n -> Cursor n -> IO ()
-showDocument (MkDocument lines _) (MkCursor _ y) = printLineByLine (limit 20) (S Z) y lines
+showDocument : Nat -> Document n -> Cursor n -> IO ()
+showDocument middle (MkDocument lines _) (MkCursor _ y) = printLineByLine (limit 40) (S Z) ((finToInteger y) - (toIntegerNat middle)) lines
 
 export
 saveDocument : Document n -> IO ()
