@@ -13,12 +13,20 @@ import EditorMode
 error : String -> IO ()
 error = putStrLn
 
+makeSt : String -> (n : Nat ** Vect n String) -> State
+makeSt fn ((S _) ** lines) = initState $ MkDocument lines fn
+makeSt fn (Z ** lines) = initState $ MkDocument [""] fn
+
+makeState : String -> String -> State
+makeState fileName content =
+  let lines = (_ ** fromList $ lines content)
+   in makeSt fileName lines
+
 partial
 main : IO ()
 main = do
   arguments <- getArgs
-  let (Just filename) = index' 1 arguments | error "usage: p <filename>"
-  Right fileContent <- readFile filename | error ("unable to open file: " ++ filename)
-  let initialState = initState $ MkDocument (""::(fromList $ lines fileContent)) filename --todo: solve initstate (S n) issue
+  let (Just fileName) = index' 1 arguments | error "usage: p <filename>"
+  Right fileContent <- readFile fileName | error ("unable to open file: " ++ fileName)
   setRaw
-  run forever (normalEditor initialState)
+  run forever $ normalEditor $ makeState fileName fileContent
