@@ -2,6 +2,8 @@ module Cursor
 
 import Data.Fin
 
+%default total
+
 public export
 data Cursor : Nat -> Type where
   MkCursor : Nat -> Fin n -> Cursor n

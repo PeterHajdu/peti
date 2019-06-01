@@ -7,6 +7,8 @@ import Document
 import Data.Fin
 import Parser
 
+%default total
+
 public export
 data NormalInput : Type where
   NormalUp : NormalInput

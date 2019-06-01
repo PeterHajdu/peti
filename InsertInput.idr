@@ -4,6 +4,8 @@ import State
 import Cursor
 import Document
 
+%default total
+
 public export
 data InsertInput : Type where
   InsertChar : Char -> InsertInput

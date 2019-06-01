@@ -2,6 +2,8 @@ module Parser
 
 import Data.Fuel
 
+%default total
+
 public export
 data Parser : Type -> Type -> Type where
    Continuation : (i -> Parser i o) -> Parser i o

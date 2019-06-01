@@ -6,6 +6,8 @@ import Cursor
 import Terminal
 import Data.Fuel
 
+%default total
+
 public export
 data Document : Nat -> Type where
   MkDocument : Vect (S n) String -> (filename: String) -> Document (S n)
