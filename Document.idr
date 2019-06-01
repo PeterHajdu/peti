@@ -10,15 +10,15 @@ import Data.Fuel
 
 public export
 data Document : Nat -> Type where
-  MkDocument : Vect (S n) String -> (filename: String) -> Document (S n)
+  MkDocument : Vect (S n) String -> Cursor (S n) -> (filename: String) -> Document (S n)
 
 export
 Show (Document n) where
-  show (MkDocument lines _) = show lines
+  show (MkDocument lines _ _) = show lines
 
 export
 Eq (Document n) where
-  (MkDocument lines1 _) == (MkDocument lines2 _) = lines1 == lines2
+  (MkDocument lines1 _ _) == (MkDocument lines2 _  _) = lines1 == lines2
 
 insertToLine : String -> Nat -> Char -> String
 insertToLine line x c = let column = minimum x (length line) --todo: check openbsd segfault
@@ -27,12 +27,12 @@ insertToLine line x c = let column = minimum x (length line) --todo: check openb
                          in linestart ++ (singleton c) ++ end
 
 export
-insert : Document n -> Cursor n -> Char -> Document n
-insert doc@(MkDocument lines fn) (MkCursor x y) c =
+insert : Document n -> Char -> Document n
+insert doc@(MkDocument lines cur@(MkCursor x y) fn) c =
   let line = Vect.index y lines
       newLine = (insertToLine line x c)
       newLines = replaceAt y newLine lines
-   in MkDocument newLines fn
+   in MkDocument newLines (right cur) fn
 
 splitLineAt : String -> Nat -> (String, String)
 splitLineAt line x = (substr 0 x line, substr x 100 line)
@@ -42,31 +42,31 @@ safeStrTail str = if 0 == (length str) then "" else substr 1 (length str) str
 
 --todo: extract some duplication if possible
 export
-deleteBack : Document n -> Cursor n -> Document n
-deleteBack doc@(MkDocument lines fn) (MkCursor x y) =
+deleteBack : Document n -> Document n
+deleteBack doc@(MkDocument lines cur@(MkCursor x y) fn) =
   let line = Vect.index y lines
       (firstPart, secondPart) = splitLineAt line (minus x 1)
       newLine = firstPart ++ (safeStrTail secondPart)
       newLines = replaceAt y newLine lines
-   in MkDocument newLines fn
+   in MkDocument newLines cur fn
 
 export
-deleteAt : Document n -> Cursor n -> Document n
-deleteAt doc@(MkDocument lines fn) (MkCursor x y) =
+deleteAt : Document n -> Document n
+deleteAt doc@(MkDocument lines cur@(MkCursor x y) fn) =
   let line = Vect.index y lines
       (firstPart, secondPart) = splitLineAt line x
       newLine = firstPart ++ (safeStrTail secondPart)
       newLines = replaceAt y newLine lines
-   in MkDocument newLines fn
+   in MkDocument newLines cur fn
 
 export
-newLine : Document (S n) -> Cursor (S n) -> Document (S (S n))
-newLine {n} doc@(MkDocument lines fn) (MkCursor x y) =
+newLine : Document n -> Document (S n)
+newLine (MkDocument lines (MkCursor x y) fn) =
     let line = Vect.index y lines
         (firstLine, secondLine) = splitLineAt line x
         withTruncatedLine = replaceAt y firstLine lines
         newLines = insertAt (shift 1 y) secondLine withTruncatedLine
-     in MkDocument newLines fn
+     in MkDocument newLines (MkCursor Z (FS y)) fn
 
 printLineByLine : Fuel -> Nat -> Integer -> Vect n String -> IO ()
 printLineByLine Dry _ _ _ = pure ()
@@ -81,33 +81,71 @@ printLineByLine (More fuel) y theoreticalRow lines {n} = do
   printLineByLine fuel (S y) (theoreticalRow + 1) lines
 
 export
-showDocument : Nat -> Document n -> Cursor n -> IO ()
-showDocument middle (MkDocument lines _) (MkCursor _ y) = printLineByLine (limit 40) (S Z) ((finToInteger y) - (toIntegerNat middle)) lines
+showDocument : Document n -> IO ()
+showDocument (MkDocument lines (MkCursor x y) _)  = do
+  rows <- getRows
+  let middle = divNatNZ rows 2 SIsNotZ
+  printLineByLine (limit rows) (S Z) ((finToInteger y) - (toIntegerNat middle)) lines
+  moveCursor (S x) middle
 
 export
 saveDocument : Document n -> IO ()
-saveDocument (MkDocument lines fn) = do
+saveDocument (MkDocument lines _ fn) = do
   writeFile fn (foldl (\acc, line => acc ++ line ++ "\n") "" lines)
   pure ()
 
 export
-endOfLine : Cursor n -> Document n -> Cursor n
-endOfLine (MkCursor _ y) (MkDocument lines _) = MkCursor (pred $ length $ index y lines) y
+cursorUp : Document n -> Document n
+cursorUp (MkDocument lines cursor fn) = MkDocument lines (up cursor) fn
 
 export
-endOfWord : Cursor (S n) -> Document (S n) -> Cursor (S n)
-endOfWord old@(MkCursor oldX y) (MkDocument lines _) =
+cursorLeft : Document n -> Document n
+cursorLeft (MkDocument lines cursor fn) = MkDocument lines (left cursor) fn
+
+export
+cursorRight : Document n -> Document n
+cursorRight (MkDocument lines cursor fn) = MkDocument lines (right cursor) fn
+
+export
+cursorDownInBounds : Document n -> Document n
+cursorDownInBounds (MkDocument lines cursor fn) = MkDocument lines (downInBounds cursor) fn
+
+--todo: this should be much simpler
+toZ : Fin n -> Fin n
+toZ original {n} = case natToFin Z n of
+                     Just k => k
+                     Nothing => original
+
+export
+cursorTop : Document n -> Document n
+cursorTop (MkDocument lines (MkCursor x y) fn) = MkDocument lines (MkCursor x (toZ y)) fn
+
+export
+cursorBottom : Document n -> Document n
+cursorBottom (MkDocument lines (MkCursor x y) fn) = MkDocument lines (MkCursor x last) fn
+
+export
+cursorBeginningOfLine : Document n -> Document n
+cursorBeginningOfLine (MkDocument lines (MkCursor x y) fn) = MkDocument lines (MkCursor Z y) fn
+
+export
+cursorEndOfLine : Document n -> Document n
+cursorEndOfLine (MkDocument lines (MkCursor x y) fn) = MkDocument lines (MkCursor (pred $ length $ index y lines) y) fn
+
+export
+cursorEndOfWord : Document n -> Document n
+cursorEndOfWord (MkDocument lines (MkCursor oldX y) fn) =
   let line = index y lines
       wordEnds = (elemIndices ' ' $ unpack $ line)
       maybeNextEnd = find (\x => x > (S oldX)) wordEnds
       nextEnd = maybe (length line) id maybeNextEnd
-   in MkCursor (pred nextEnd) y
+   in MkDocument lines (MkCursor (pred nextEnd) y) fn
 
 export
-beginningOfWord : Cursor (S n) -> Document (S n) -> Cursor (S n)
-beginningOfWord old@(MkCursor oldX y) (MkDocument lines _) =
+cursorBeginningOfWord : Document n -> Document n
+cursorBeginningOfWord  (MkDocument lines (MkCursor oldX y) fn) =
   let line = index y lines
       wordEnds = reverse $ elemIndices ' ' $ unpack $ line
       maybeNextStart = S <$> find (\x => x < (pred oldX)) wordEnds
       nextStart = maybe Z id maybeNextStart
-   in MkCursor nextStart y
+   in MkDocument lines (MkCursor nextStart y) fn

@@ -11,12 +11,6 @@ import Data.Fin
 
 %default total
 
-toZ : Fin n -> Fin n
-toZ original {n} = case natToFin Z n of
-                     Just k => k
-                     Nothing => original
-
-
 normalModeChange : Maybe NormalInput -> EditorMode
 normalModeChange (Just NormalInsert) = Insert
 normalModeChange (Just NormalQuit) = Quit
@@ -57,22 +51,21 @@ mutual
   normalEditor state = do
     ShowState state
     maybeInput <- GetNormalInput
-    let (MkState cur doc) = state
-    let (MkCursor x y) = cur
+    let (MkState doc) = state
     case maybeInput of
       Nothing => normalEditor state
       Just NormalInsert => insertEditor state
-      Just NormalUp => normalEditor $ MkState (up cur) doc
-      Just NormalLeft => normalEditor $ MkState (left cur) doc
-      Just NormalRight => normalEditor $ MkState (right cur) doc
-      Just NormalDown => normalEditor $ MkState (downWithBound cur) doc
-      Just NormalDeleteAt => normalEditor $ MkState cur (deleteAt doc cur)
-      Just NormalTop => normalEditor $ MkState (MkCursor x (toZ y)) doc
-      Just NormalBottom => normalEditor $ MkState (MkCursor x last) doc
-      Just NormalBeginningOfLine => normalEditor $ MkState (MkCursor Z y) doc
-      Just NormalEndOfLine => normalEditor $ MkState (endOfLine cur doc) doc
-      Just NormalEndOfWord => normalEditor $ MkState (endOfWord cur doc) doc
-      Just NormalBeginningOfWord => normalEditor $ MkState (beginningOfWord cur doc) doc
+      Just NormalUp => normalEditor $ MkState $ cursorUp doc
+      Just NormalLeft => normalEditor $ MkState $ cursorLeft doc
+      Just NormalRight => normalEditor $ MkState $ cursorRight doc
+      Just NormalDown => normalEditor $ MkState $ cursorDownInBounds doc
+      Just NormalDeleteAt => normalEditor $ MkState (deleteAt doc)
+      Just NormalTop => normalEditor $ MkState $ cursorTop doc
+      Just NormalBottom => normalEditor $ MkState $ cursorBottom doc
+      Just NormalBeginningOfLine => normalEditor $ MkState $ cursorBeginningOfLine doc
+      Just NormalEndOfLine => normalEditor $ MkState $ cursorEndOfLine doc
+      Just NormalEndOfWord => normalEditor $ MkState $ cursorEndOfWord doc
+      Just NormalBeginningOfWord => normalEditor $ MkState $ cursorBeginningOfWord doc
       Just NormalSave => do
         Save state
         normalEditor state
@@ -83,12 +76,12 @@ mutual
   insertEditor state = do
     ShowState state
     input <- GetInsertInput
-    let (MkState cur doc) = state
+    let (MkState doc) = state
     case input of
-      (InsertChar c) => insertEditor $ MkState (right cur) (insert doc cur c)
-      InsertNewLine => insertEditor $ MkState (lineStart $ down cur) (newLine doc cur)
+      (InsertChar c) => insertEditor $ MkState (insert doc c)
+      InsertNewLine => insertEditor $ MkState (newLine doc)
       InsertNormal => normalEditor state
-      InsertBackspace => insertEditor $ MkState (left cur) (deleteBack doc cur)
+      InsertBackspace => insertEditor $ MkState (deleteBack doc)
 
 private
 runCommand : Command a s1 s2-> IO a

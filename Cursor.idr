@@ -30,8 +30,8 @@ down : Cursor n -> Cursor (S n)
 down (MkCursor x y) = MkCursor x (shift 1 y)
 
 export
-downWithBound : Cursor n -> Cursor n
-downWithBound originalCursor@(MkCursor x y) =
+downInBounds : Cursor n -> Cursor n
+downInBounds originalCursor@(MkCursor x y) =
   case strengthen $ shift 1 y of
     Left _ => originalCursor
     Right newY => MkCursor x newY

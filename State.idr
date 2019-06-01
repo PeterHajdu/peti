@@ -1,7 +1,6 @@
 module State
 
 import Terminal
-import Cursor
 import Document
 import Data.Vect
 
@@ -9,24 +8,21 @@ import Data.Vect
 
 public export
 data State : Type where
-  MkState : Cursor (S n) -> Document (S n) -> State
+  MkState : Document n -> State
 
 export
 showState : State -> IO ()
-showState (MkState cursor@(MkCursor x y) doc) = do
-  rows <- getRows
+showState (MkState doc) = do
   clearScreen
-  let middle = divNatNZ rows 2 SIsNotZ
-  showDocument middle doc cursor
-  moveCursor (S x) (S middle)
+  showDocument doc
 
 export
 initState : Document (S n) -> State
-initState doc = MkState (MkCursor Z last) doc
+initState doc = MkState doc
 
 export
 saveDocument : State -> IO ()
-saveDocument (MkState _ doc) = do
+saveDocument (MkState doc) = do
   saveDocument doc
   pure ()
 

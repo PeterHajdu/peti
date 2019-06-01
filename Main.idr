@@ -5,6 +5,7 @@ import Data.Vect
 import State
 import Editor
 import Document
+import Cursor
 import Terminal
 import EditorMode
 
@@ -14,8 +15,8 @@ error : String -> IO ()
 error = putStrLn
 
 makeSt : String -> (n : Nat ** Vect n String) -> State
-makeSt fn ((S _) ** lines) = initState $ MkDocument lines fn
-makeSt fn (Z ** lines) = initState $ MkDocument [""] fn
+makeSt fn ((S _) ** lines) = initState $ MkDocument lines (MkCursor Z FZ) fn
+makeSt fn (Z ** lines) = initState $ MkDocument [""] (MkCursor Z FZ) fn
 
 makeState : String -> String -> State
 makeState fileName content =
