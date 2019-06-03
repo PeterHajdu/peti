@@ -19,6 +19,7 @@ data NormalInput : Type where
   NormalSave : NormalInput
   NormalQuit : NormalInput
   NormalDeleteAt : NormalInput
+  NormalDeleteLine : NormalInput
   NormalTop : NormalInput
   NormalBottom : NormalInput
   NormalBeginningOfLine : NormalInput
@@ -38,6 +39,7 @@ parser = Continuation $ \c1 => case c1 of
     'x' => Finished $ Just NormalDeleteAt
     'G' => Finished $ Just NormalBottom
     'g' => Continuation $ \c2 => Finished $ if c2 == 'g' then Just NormalTop else Nothing
+    'd' => Continuation $ \c2 => Finished $ if c2 == 'd' then Just NormalDeleteLine else Nothing
     '|' => Finished $ Just NormalBeginningOfLine
     '$' => Finished $ Just NormalEndOfLine
     'e' => Finished $ Just NormalEndOfWord

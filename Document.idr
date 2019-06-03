@@ -61,6 +61,17 @@ deleteAt doc@(MkDocument lines cur@(MkCursor x y) fn) =
    in MkDocument newLines cur fn
 
 export
+deleteLine : Document -> Document
+deleteLine (MkDocument lines cur@(MkCursor x y) fn) =
+  let newLines = deleteAt y lines
+   in case newLines of
+        (_ :: _) => let newY = case strengthen y of
+                                 Left _ => last
+                                 Right ny => ny
+                     in MkDocument newLines (MkCursor x newY) fn
+        Nil => MkDocument [""] (MkCursor x FZ) fn
+
+export
 newLine : Document -> Document
 newLine (MkDocument lines (MkCursor x y) fn) =
     let line = Vect.index y lines
