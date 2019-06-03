@@ -8,7 +8,7 @@ import Data.Vect
 
 public export
 data State : Type where
-  MkState : Document n -> State
+  MkState : Document -> State
 
 export
 showState : State -> IO ()
@@ -17,7 +17,7 @@ showState (MkState doc) = do
   showDocument doc
 
 export
-initState : Document (S n) -> State
+initState : Document -> State
 initState doc = MkState doc
 
 export

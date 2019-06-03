@@ -14,6 +14,7 @@ import EditorMode
 error : String -> IO ()
 error = putStrLn
 
+--todo: check if this is still needed
 makeSt : String -> (n : Nat ** Vect n String) -> State
 makeSt fn ((S _) ** lines) = initState $ MkDocument lines (MkCursor Z FZ) fn
 makeSt fn (Z ** lines) = initState $ MkDocument [""] (MkCursor Z FZ) fn
