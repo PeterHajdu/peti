@@ -36,6 +36,14 @@ downInBounds originalCursor@(MkCursor x y) =
     Left _ => originalCursor
     Right newY => MkCursor x newY
 
+--todo: is it possible to use something like strengthenN and shift?
+export
+downWithnInBounds : Nat -> Cursor n -> Cursor n
+downWithnInBounds d originalCursor@(MkCursor x y) {n} =
+  case natToFin ((finToNat y) + d) n of
+    Nothing => originalCursor
+    Just newY => MkCursor x newY
+
 export
 lineStart : Cursor n -> Cursor n
 lineStart (MkCursor _ y) = MkCursor Z y

@@ -128,9 +128,25 @@ toZ original {n} = case natToFin Z n of
                      Just k => k
                      Nothing => original
 
+decWith : Nat -> Fin n -> Fin n
+decWith y original {n} = case natToFin ((finToNat original) `minus` y) n of
+                       Just k => k
+                       Nothing => original
+
 export
 cursorTop : Document -> Document
 cursorTop (MkDocument lines (MkCursor x y) fn) = MkDocument lines (MkCursor x (toZ y)) fn
+
+page : Nat
+page = 20
+
+export
+cursorPageUp : Document -> Document
+cursorPageUp (MkDocument lines (MkCursor x y) fn) = MkDocument lines (MkCursor x (decWith page y)) fn
+
+export
+cursorPageDown : Document -> Document
+cursorPageDown (MkDocument lines cur fn) = MkDocument lines (downWithnInBounds page cur) fn
 
 export
 cursorBottom : Document -> Document
