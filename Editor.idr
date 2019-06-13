@@ -16,6 +16,7 @@ normalModeChange (Just NormalInsert) = Insert
 normalModeChange (Just NormalInsertNewLine) = Insert
 normalModeChange (Just NormalInsertRight) = Insert
 normalModeChange (Just NormalInsertBeginningOfLine) = Insert
+normalModeChange (Just NormalInsertEndOfLine) = Insert
 normalModeChange (Just NormalQuit) = Quit
 normalModeChange _ = Normal
 
@@ -61,6 +62,7 @@ mutual
       Just NormalInsertNewLine => insertEditor $ MkState $ cursorDownNewLine doc
       Just NormalInsertRight => insertEditor $ MkState $ cursorRight doc
       Just NormalInsertBeginningOfLine => insertEditor $ MkState $ cursorBeginningOfLine doc
+      Just NormalInsertEndOfLine => insertEditor $ MkState $ cursorRight $ cursorEndOfLine doc
       Just NormalUp => normalEditor $ MkState $ cursorUp doc
       Just NormalLeft => normalEditor $ MkState $ cursorLeft doc
       Just NormalRight => normalEditor $ MkState $ cursorRight doc
