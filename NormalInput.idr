@@ -28,6 +28,7 @@ data NormalInput : Type where
   NormalBeginningOfWord : NormalInput
   NormalPageUp : NormalInput
   NormalPageDown : NormalInput
+  NormalInsertNewLine : NormalInput
 
 parser : Parser Char NormalInput
 parser = Continuation $ \c1 => case (ord c1) of
@@ -36,6 +37,7 @@ parser = Continuation $ \c1 => case (ord c1) of
     107 => Finished $ Just NormalUp
     108 => Finished $ Just NormalRight
     105 => Finished $ Just NormalInsert
+    111 => Finished $ Just NormalInsertNewLine
     119 => Finished $ Just NormalSave
     113 => Finished $ Just NormalQuit
     120 => Finished $ Just NormalDeleteAt

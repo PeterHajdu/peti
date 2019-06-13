@@ -72,6 +72,13 @@ deleteLine (MkDocument lines cur@(MkCursor x y) fn) =
         Nil => MkDocument [""] (MkCursor x FZ) fn
 
 export
+cursorDownNewLine : Document -> Document
+cursorDownNewLine (MkDocument lines (MkCursor x y) fn) =
+    let newLineIndex = FS y
+        newLines = insertAt newLineIndex "" lines
+     in MkDocument newLines (MkCursor Z newLineIndex) fn
+
+export
 newLine : Document -> Document
 newLine (MkDocument lines (MkCursor x y) fn) =
     let line = Vect.index y lines
