@@ -14,6 +14,7 @@ import Data.Fin
 normalModeChange : Maybe NormalInput -> EditorMode
 normalModeChange (Just NormalInsert) = Insert
 normalModeChange (Just NormalInsertNewLine) = Insert
+normalModeChange (Just NormalInsertNewLineUp) = Insert
 normalModeChange (Just NormalInsertRight) = Insert
 normalModeChange (Just NormalInsertBeginningOfLine) = Insert
 normalModeChange (Just NormalInsertEndOfLine) = Insert
@@ -60,6 +61,7 @@ mutual
       Nothing => normalEditor state
       Just NormalInsert => insertEditor state
       Just NormalInsertNewLine => insertEditor $ MkState $ cursorDownNewLine doc
+      Just NormalInsertNewLineUp => insertEditor $ MkState $ cursorUp $ newLine $ cursorBeginningOfLine $ doc --todo: this should be simpler
       Just NormalInsertRight => insertEditor $ MkState $ cursorRight doc
       Just NormalInsertBeginningOfLine => insertEditor $ MkState $ cursorBeginningOfLine doc
       Just NormalInsertEndOfLine => insertEditor $ MkState $ cursorRight $ cursorEndOfLine doc

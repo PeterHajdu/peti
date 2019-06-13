@@ -32,6 +32,7 @@ data NormalInput : Type where
   NormalInsertRight : NormalInput
   NormalInsertBeginningOfLine : NormalInput
   NormalInsertEndOfLine : NormalInput
+  NormalInsertNewLineUp : NormalInput
 
 parser : Parser Char NormalInput
 parser = Continuation $ \c1 => case (ord c1) of
@@ -41,6 +42,7 @@ parser = Continuation $ \c1 => case (ord c1) of
     108 => Finished $ Just NormalRight
     105 => Finished $ Just NormalInsert
     111 => Finished $ Just NormalInsertNewLine
+    79 => Finished $ Just NormalInsertNewLineUp
     97 => Finished $ Just NormalInsertRight
     73 => Finished $ Just NormalInsertBeginningOfLine
     65 => Finished $ Just NormalInsertEndOfLine
