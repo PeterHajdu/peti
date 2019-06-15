@@ -27,6 +27,7 @@ data NormalInput : Type where
   NormalEndOfWord : NormalInput
   NormalBeginningOfNextWord : NormalInput
   NormalDeleteUntilNextWord : NormalInput
+  NormalChangeUntilNextWord : NormalInput
   NormalBeginningOfWord : NormalInput
   NormalPageUp : NormalInput
   NormalPageDown : NormalInput
@@ -64,6 +65,7 @@ parser = Continuation $ \c1 => case (ord c1) of
     98 => Finished $ Just NormalBeginningOfWord
     21 => Finished $ Just NormalPageUp
     4 => Finished $ Just NormalPageDown
+    99 => Continuation $ \c2 => Finished $ if c2 == 'w' then Just NormalChangeUntilNextWord else Nothing
     _ => Finished Nothing
 
 export
