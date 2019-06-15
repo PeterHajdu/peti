@@ -71,6 +71,7 @@ mutual
       Just NormalDown => normalEditor $ MkState $ cursorDownInBounds doc
       Just NormalDeleteAt => normalEditor $ MkState (deleteAt doc)
       Just NormalDeleteLine => normalEditor $ MkState (deleteLine doc)
+      Just NormalDeleteUntilNextWord => normalEditor $ MkState (deleteUntilNextWord doc)
       Just NormalTop => normalEditor $ MkState $ cursorTop doc
       Just NormalBottom => normalEditor $ MkState $ cursorBottom doc
       Just NormalBeginningOfLine => normalEditor $ MkState $ cursorBeginningOfLine doc

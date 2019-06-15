@@ -191,5 +191,24 @@ cursorBeginningOfNextWord  (MkDocument lines (MkCursor oldX y) fn) =
   let line = index y lines
       wordEnds = elemIndices ' ' $ unpack $ line
       maybeNextStart = S <$> find (\x => x > oldX) wordEnds
-      nextStart = maybe Z id maybeNextStart
+      nextStart = maybe (length line) id maybeNextStart
    in MkDocument lines (MkCursor nextStart y) fn
+
+deleteFromLine : String -> Nat -> Nat -> String
+deleteFromLine line from to =
+  let from' = minimum from (length line)
+      to'   = minimum to (length line)
+      linestart = substr 0 from' line
+      end = substr to' (length line) line
+   in linestart ++ end
+
+export
+deleteUntilNextWord : Document -> Document
+deleteUntilNextWord  (MkDocument lines (MkCursor oldX y) fn) =
+  let line = index y lines
+      wordEnds = elemIndices ' ' $ unpack $ line
+      maybeNextStart = S <$> find (\x => x > oldX) wordEnds
+      nextStart = maybe (length line) id maybeNextStart
+      newLine = deleteFromLine line oldX nextStart
+      newLines = replaceAt y newLine lines
+   in MkDocument newLines (MkCursor oldX y) fn
