@@ -28,6 +28,7 @@ data NormalInput : Type where
   NormalBeginningOfNextWord : NormalInput
   NormalDeleteUntilNextWord : NormalInput
   NormalDeleteAWord : NormalInput
+  NormalChangeAWord : NormalInput
   NormalChangeUntilNextWord : NormalInput
   NormalBeginningOfWord : NormalInput
   NormalPageUp : NormalInput
@@ -45,6 +46,13 @@ deleteParser =
                           'd' => Finished $ Just NormalDeleteLine
                           'w' => Finished $ Just NormalDeleteUntilNextWord
                           _   => Finished Nothing
+
+changeParser : Parser Char NormalInput
+changeParser =
+  Continuation $ \c2 => case c2 of
+                          'a' => Continuation $ \c3 => Finished $ if c3 == 'w' then Just NormalChangeAWord else Nothing
+                          'w' => Finished $ Just NormalChangeUntilNextWord
+                          _ => Finished Nothing
 
 parser : Parser Char NormalInput
 parser = Continuation $ \c1 => case (ord c1) of
@@ -71,7 +79,7 @@ parser = Continuation $ \c1 => case (ord c1) of
     98 => Finished $ Just NormalBeginningOfWord
     21 => Finished $ Just NormalPageUp
     4 => Finished $ Just NormalPageDown
-    99 => Continuation $ \c2 => Finished $ if c2 == 'w' then Just NormalChangeUntilNextWord else Nothing
+    99 => changeParser
     _ => Finished Nothing
 
 export

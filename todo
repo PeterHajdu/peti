@@ -1,6 +1,3 @@
- * cw
- * daw
- * caw
  * {
  * }
  * %
@@ -14,4 +11,6 @@
  * t
  * .
  * Can I use it?
+ * replace String with Vector Char?
  * refactor
+ * proper parser
