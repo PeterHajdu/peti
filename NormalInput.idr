@@ -27,6 +27,7 @@ data NormalInput : Type where
   NormalEndOfWord : NormalInput
   NormalBeginningOfNextWord : NormalInput
   NormalDeleteUntilNextWord : NormalInput
+  NormalDeleteAWord : NormalInput
   NormalChangeUntilNextWord : NormalInput
   NormalBeginningOfWord : NormalInput
   NormalPageUp : NormalInput
@@ -36,6 +37,14 @@ data NormalInput : Type where
   NormalInsertBeginningOfLine : NormalInput
   NormalInsertEndOfLine : NormalInput
   NormalInsertNewLineUp : NormalInput
+
+deleteParser : Parser Char NormalInput
+deleteParser =
+  Continuation $ \c2 => case c2 of
+                          'a' => Continuation $ \c3 => Finished $ if c3 == 'w' then Just NormalDeleteAWord else Nothing
+                          'd' => Finished $ Just NormalDeleteLine
+                          'w' => Finished $ Just NormalDeleteUntilNextWord
+                          _   => Finished Nothing
 
 parser : Parser Char NormalInput
 parser = Continuation $ \c1 => case (ord c1) of
@@ -54,10 +63,7 @@ parser = Continuation $ \c1 => case (ord c1) of
     120 => Finished $ Just NormalDeleteAt
     71 => Finished $ Just NormalBottom
     103 => Continuation $ \c2 => Finished $ if c2 == 'g' then Just NormalTop else Nothing
-    100 => Continuation $ \c2 => Finished $ case c2 of
-                                              'd' => Just NormalDeleteLine
-                                              'w' => Just NormalDeleteUntilNextWord
-                                              _   => Nothing
+    100 => deleteParser
     124 => Finished $ Just NormalBeginningOfLine
     36 => Finished $ Just NormalEndOfLine
     101 => Finished $ Just NormalEndOfWord
@@ -70,4 +76,4 @@ parser = Continuation $ \c1 => case (ord c1) of
 
 export
 getNormalInput : IO (Maybe NormalInput)
-getNormalInput = runParser (limit 3) getChar parser
+getNormalInput = runParser (limit 4) getChar parser

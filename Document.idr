@@ -167,32 +167,41 @@ export
 cursorEndOfLine : Document -> Document
 cursorEndOfLine (MkDocument lines (MkCursor x y) fn) = MkDocument lines (MkCursor (pred $ length $ index y lines) y) fn
 
-export
-cursorEndOfWord : Document -> Document
-cursorEndOfWord (MkDocument lines (MkCursor oldX y) fn) =
+endOfWord : Document -> Nat
+endOfWord (MkDocument lines (MkCursor oldX y) fn) =
   let line = index y lines
       wordEnds = (elemIndices ' ' $ unpack $ line)
       maybeNextEnd = find (\x => x > (S oldX)) wordEnds
-      nextEnd = maybe (length line) id maybeNextEnd
-   in MkDocument lines (MkCursor (pred nextEnd) y) fn
+   in pred $ maybe (length line) id maybeNextEnd
+
+export
+cursorEndOfWord : Document -> Document
+cursorEndOfWord doc@(MkDocument lines (MkCursor oldX y) fn) =
+  MkDocument lines (MkCursor (endOfWord doc) y) fn
+
+beginningOfWord : Nat -> Document -> Nat
+beginningOfWord from (MkDocument lines (MkCursor _ y) fn) =
+  let line = index y lines
+      wordEnds = reverse $ elemIndices ' ' $ unpack $ line
+      maybeNextStart = S <$> find (\x => x < from) wordEnds
+   in maybe Z id maybeNextStart
 
 export
 cursorBeginningOfWord : Document -> Document
-cursorBeginningOfWord  (MkDocument lines (MkCursor oldX y) fn) =
-  let line = index y lines
-      wordEnds = reverse $ elemIndices ' ' $ unpack $ line
-      maybeNextStart = S <$> find (\x => x < (pred oldX)) wordEnds
-      nextStart = maybe Z id maybeNextStart
-   in MkDocument lines (MkCursor nextStart y) fn
+cursorBeginningOfWord  doc@(MkDocument lines (MkCursor oldX y) fn) =
+  MkDocument lines (MkCursor (beginningOfWord (pred oldX) doc) y) fn
 
-export
-cursorBeginningOfNextWord : Document -> Document
-cursorBeginningOfNextWord  (MkDocument lines (MkCursor oldX y) fn) =
+beginningOfNextWord : Document -> Nat
+beginningOfNextWord (MkDocument lines (MkCursor oldX y) fn) =
   let line = index y lines
       wordEnds = elemIndices ' ' $ unpack $ line
       maybeNextStart = S <$> find (\x => x > oldX) wordEnds
-      nextStart = maybe (length line) id maybeNextStart
-   in MkDocument lines (MkCursor nextStart y) fn
+   in maybe (length line) id maybeNextStart
+
+export
+cursorBeginningOfNextWord : Document -> Document
+cursorBeginningOfNextWord doc@(MkDocument lines (MkCursor oldX y) fn) =
+  MkDocument lines (MkCursor (beginningOfNextWord doc) y) fn
 
 deleteFromLine : String -> Nat -> Nat -> String
 deleteFromLine line from to =
@@ -212,3 +221,13 @@ deleteUntilNextWord  (MkDocument lines (MkCursor oldX y) fn) =
       newLine = deleteFromLine line oldX nextStart
       newLines = replaceAt y newLine lines
    in MkDocument newLines (MkCursor oldX y) fn
+
+export
+deleteAWord : Document -> Document
+deleteAWord  doc@(MkDocument lines (MkCursor x y) fn) =
+  let line     = index y lines
+      from     = beginningOfWord x doc
+      to       = beginningOfNextWord doc
+      newLine  = deleteFromLine line from to
+      newLines = replaceAt y newLine lines
+   in MkDocument newLines (MkCursor from y) fn
