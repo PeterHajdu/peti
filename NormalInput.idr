@@ -25,6 +25,7 @@ data NormalInput : Type where
   NormalBeginningOfLine : NormalInput
   NormalEndOfLine : NormalInput
   NormalEndOfWord : NormalInput
+  NormalBeginningOfNextWord : NormalInput
   NormalBeginningOfWord : NormalInput
   NormalPageUp : NormalInput
   NormalPageDown : NormalInput
@@ -46,7 +47,7 @@ parser = Continuation $ \c1 => case (ord c1) of
     97 => Finished $ Just NormalInsertRight
     73 => Finished $ Just NormalInsertBeginningOfLine
     65 => Finished $ Just NormalInsertEndOfLine
-    119 => Finished $ Just NormalSave
+    115 => Finished $ Just NormalSave
     113 => Finished $ Just NormalQuit
     120 => Finished $ Just NormalDeleteAt
     71 => Finished $ Just NormalBottom
@@ -55,6 +56,7 @@ parser = Continuation $ \c1 => case (ord c1) of
     124 => Finished $ Just NormalBeginningOfLine
     36 => Finished $ Just NormalEndOfLine
     101 => Finished $ Just NormalEndOfWord
+    119 => Finished $ Just NormalBeginningOfNextWord
     98 => Finished $ Just NormalBeginningOfWord
     21 => Finished $ Just NormalPageUp
     4 => Finished $ Just NormalPageDown

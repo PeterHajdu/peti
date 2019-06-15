@@ -184,3 +184,12 @@ cursorBeginningOfWord  (MkDocument lines (MkCursor oldX y) fn) =
       maybeNextStart = S <$> find (\x => x < (pred oldX)) wordEnds
       nextStart = maybe Z id maybeNextStart
    in MkDocument lines (MkCursor nextStart y) fn
+
+export
+cursorBeginningOfNextWord : Document -> Document
+cursorBeginningOfNextWord  (MkDocument lines (MkCursor oldX y) fn) =
+  let line = index y lines
+      wordEnds = elemIndices ' ' $ unpack $ line
+      maybeNextStart = S <$> find (\x => x > oldX) wordEnds
+      nextStart = maybe Z id maybeNextStart
+   in MkDocument lines (MkCursor nextStart y) fn

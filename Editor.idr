@@ -76,6 +76,7 @@ mutual
       Just NormalBeginningOfLine => normalEditor $ MkState $ cursorBeginningOfLine doc
       Just NormalEndOfLine => normalEditor $ MkState $ cursorEndOfLine doc
       Just NormalEndOfWord => normalEditor $ MkState $ cursorEndOfWord doc
+      Just NormalBeginningOfNextWord => normalEditor $ MkState $ cursorBeginningOfNextWord doc
       Just NormalBeginningOfWord => normalEditor $ MkState $ cursorBeginningOfWord doc
       Just NormalPageUp => normalEditor $ MkState $ cursorPageUp doc
       Just NormalPageDown => normalEditor $ MkState $ cursorPageDown doc
