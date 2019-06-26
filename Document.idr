@@ -49,7 +49,7 @@ deleteBack doc@(MkDocument lines cur@(MkCursor x y) fn) =
       (firstPart, secondPart) = splitLineAt line (minus x 1)
       newLine = firstPart ++ (safeStrTail secondPart)
       newLines = replaceAt y newLine lines
-   in MkDocument newLines cur fn
+   in MkDocument newLines (left cur) fn
 
 export
 deleteAt : Document -> Document
